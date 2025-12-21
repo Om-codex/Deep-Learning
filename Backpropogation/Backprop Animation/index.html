@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neural Network Visualizer</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // Configure BEFORE loading MathJax
+    window.MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+        svg: { fontCache: 'global' }
+    };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    
+
+<body>
+<a href="https://github.com/Om-codex" target="_blank" class="github-corner">
+    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" class="github-icon">
+</a>
+<nav>
+  <div class="nav-left">
+    <img src="pfp.png" alt="logo" class="nav-logo">
+  </div>
+
+  <div class="nav-right">
+    <a href="#perceptron">Perceptron</a>
+    <a href="#forward-step">Forward Propagation</a>
+    <a href="#backprop">Backpropagation</a>
+  </div>
+</nav>
+
+<section class="landing">
+  <h1 id="title"></h1>
+  <p id="subtitle" class="hidden">
+    A step-by-step interactive journey from simple decision-making (perceptrons) to learning through backpropagation.
+  </p>
+</section>
+
+<section id="perceptron">
+    <div class="perceptron-container">
+
+        <!-- LEFT SIDE TEXT -->
+        <div class="perceptron-text">
+            <h2 style="font-weight:bold; font-size:40px;width:600px;">What is a Perceptron?</h2>
+            <p style="width:600px;">
+                A perceptron is the simplest kind of neural network unit.<br> 
+                It takes some input values, multiplies each one by a weight,<br> 
+                adds them together, and then passes the result through an<br> 
+                activation function to decide the output.
+            </p>
+
+            <p class="formula" style="width:600px;">
+                output = activation( w₁·x₁ + w₂·x₂ + b )
+            </p>
+
+            <p style="font-weight: bold;">
+                It’s basically a tiny decision-maker. If the combined input is strong enough,
+                it “activates.” If not, it stays inactive.
+            </p>
+        </div>
+
+        <div class="perceptron-visual">
+            <div class="diagram-box">
+                <svg id="perceptron-diagram" width="450" height="260">
+                    <!-- Inputs -->
+                    <text x="18" y="70" fill="#a7b5d1" font-size="18">x₁</text>
+                    <text x="18" y="165" fill="#a7b5d1" font-size="18">x₂</text>
+
+                    <!-- iq → neuron line -->
+                    <line x1="40" y1="70" x2="140" y2="110" class="signal-flow"/>
+                    <circle class="signal-dot" cx="40" cy="70" r="4">
+                        <animate attributeName="cx" from="40" to="140" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" from="70" to="110" dur="1.6s" repeatCount="indefinite"/>
+                    </circle>
+
+                    <!-- cgpa → neuron line -->
+                    <line x1="40" y1="160" x2="140" y2="120" class="signal-flow"/>
+                    <circle class="signal-dot" cx="40" cy="160" r="4">
+                        <animate attributeName="cx" from="40" to="140" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" from="160" to="120" dur="1.6s" repeatCount="indefinite"/>
+                    </circle>
+
+                    <!-- Weights -->
+                    <text x="95" y="90" fill="#7cc7ff" font-size="18">w₁</text>
+                    <text x="95" y="149" fill="#7cc7ff" font-size="18">w₂</text>
+
+                    <!-- Neuron (Summation Node) -->
+                    <circle cx="180" cy="115" r="34" class="neuron-node" id="activation-node"/>
+                    <text x="171" y="125" fill="#00d4ff" font-size="32">Σ</text>
+                    <text x="138" y="165" fill="#a7b5d1" font-size="14">Activation</text>
+                    <text x="147" y="182" fill="#a7b5d1" font-size="14">Function</text>
+
+                    <!-- Line to Step Function -->
+                    <line x1="216" y1="115" x2="260" y2="115" class="signal-flow"/>
+                    <circle class="signal-dot" cx="216" cy="115" r="4">
+                        <animate attributeName="cx" from="216" to="260" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" from="115" to="115" dur="1.6s" repeatCount="indefinite"/>
+                    </circle>
+
+
+                    <!-- Step Function Block -->
+                    <g id="step-function">
+                        <!-- Rounded Capsule -->
+                        <rect x="255" y="90" width="75" height="50" rx="25" fill="#2f5fe0" stroke="#7fb5ff" stroke-width="2"/>
+                        <!-- Step Symbol (Centered) -->
+                        <path d="M273 120 L290 120 L290 105 L307 105"
+                            stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <text x="275" y="160" fill="#a7b5d1" font-size="14">Step</text>
+                        <text x="260" y="175" fill="#a7b5d1" font-size="14">Function</text>
+                    </g>
+                    
+
+                    <!-- Output Line -->
+                    <line x1="330" y1="115" x2="380" y2="115" class="signal-flow"/>
+                    <circle class="signal-dot" cx="216" cy="115" r="4">
+                        <animate attributeName="cx" from="330" to="380" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" from="115" to="115" dur="1.6s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="385" y="120" fill="#a7b5d1" font-size="14">Output</text>
+
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="example-container">
+        <h2 style="font-weight:bold; font-size:28px; margin:0;">
+            A Simple Real-Life Example
+        </h2>
+
+        <p>Imagine you're deciding whether to go outside. You think about two things:</p>
+
+        <ul>
+            <li><strong>x₁:</strong> Is it sunny? (1 = yes, 0 = no)</li>
+            <li><strong>x₂:</strong> Do you have free time? (1 = yes, 0 = no)</li>
+        </ul>
+
+        <!-- Row 1 -->
+        <div class="row">
+            <p>Your brain assigns importance (weights):</p>
+            <ul>
+                <li><strong>w₁ = 0.8</strong> (sun matters a lot)</li>
+                <li><strong>w₂ = 0.5</strong> (free time matters moderately)</li>
+            </ul>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row">
+            <p>Then your brain combines the information:</p>
+            <p class="formula">
+                weighted_sum = (w₁·x₁) + (w₂·x₂) <br>
+                weighted_sum = (0.8 × x₁) + (0.5 × x₂)
+            </p>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="row">
+            <p>Now apply a <strong>step function</strong>:</p>
+            <p class="formula">
+                If weighted_sum ≥ 1 → <strong>Go Outside 😄</strong><br>
+                Else → <strong>Stay Home 😴</strong>
+            </p>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="row">
+            <p><strong>Example Scenario:</strong><br>
+            It’s sunny (<strong>x₁ = 1</strong>), but you don’t have free time (<strong>x₂ = 0</strong>).</p>
+
+            <p class="formula">
+                weighted_sum = (0.8 × 1) + (0.5 × 0) = 0.8 <br>
+                0.8 &lt; 1 → <strong>Stay Home</strong>
+            </p>
+        </div>
+    </div>
+
+</section>
+
+<section class="forward-step" id ="forward-step">
+    <div class="concept-box">
+        <h2 style="font-weight:bold; font-size:40px;width:700px;">What is Forward Propagation?</h2>
+        <p>
+            Forward propagation is the process of passing the input values forward through the network
+            to get the final output. Each neuron multiplies the input by weights, adds a bias, applies
+            an activation function, and sends the result onward.
+        </p>
+
+        <p class="forward-flow">
+            Input → Weights → Bias → Activation → Output
+        </p>
+
+        <p>
+            In simple words: It's the network's <strong>"thinking"</strong>.  
+            It takes the inputs and calculates what it believes the answer should be.
+        </p>
+    </div>
+    <h2 class="step-title" style="margin: 24px;margin-left: 0px;">Step 1: Inputs Enter the Network</h2>
+
+    <div class="diagram-box">
+
+        <svg id="step1-diagram" width="500" height="260">
+
+            <!-- Labels for Layer Names -->
+            <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+            <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+            <!-- Inputs -->
+            <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+            <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+            <!-- Animated Signal Lines to Neuron 1 -->
+            <line x1="45" y1="112" x2="210" y2="115" class="signal-flow"/>
+            <circle class="signal-dot" cx="45" cy="112" r="4">
+                <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite" />
+                <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite" />
+            </circle>
+
+            <line x1="60" y1="195" x2="210" y2="120" class="signal-flow"/>
+            <circle class="signal-dot" cx="60" cy="195" r="4">
+                <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite" />
+                <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite" />
+            </circle>
+
+            <!-- Animated Signal Lines to Neuron 2 -->
+            <line x1="45" y1="113" x2="212" y2="200" class="signal-flow"/>
+            <circle class="signal-dot" cx="45" cy="113" r="4">
+                <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite" />
+                <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite" />
+            </circle>
+
+            <line x1="50" y1="197" x2="210" y2="200" class="signal-flow"/>
+            <circle class="signal-dot" cx="50" cy="197" r="4">
+                <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite" />
+                <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite" />
+            </circle>
+
+            <!-- Hidden Layer Neurons -->
+            <circle cx="240" cy="120" r="32" class="hidden-neuron"/>
+            <circle cx="240" cy="190" r="32" class="hidden-neuron"/>
+
+        </svg>
+
+
+    </div>
+
+    <p class="step-text">
+        In this step, our network receives two input values: <strong>IQ</strong> and <strong>CGPA</strong>.  
+        These inputs are passed forward along the connections into the neurons in the hidden layer.  
+        The softly glowing lines represent the signal traveling forward through the network.
+    </p>
+
+    <h2 class="step-title" style="margin: 24px;margin-left: 0px;">Step 2: Weighted Inputs and Summation</h2>
+
+    <div class="diagram-box">
+
+            <svg id="step2-diagram" width="500" height="260">
+
+                <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="signal-flow"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="signal-flow"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="signal-flow"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="signal-flow"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+            </svg>
+
+        </div>
+
+        <p class="step-text">
+            Each connection has a <strong>weight</strong>, shown as <strong>W¹₁₁, W¹₁₂, W¹₂₁, W¹₂₂</strong>.  
+            Each hidden neuron multiplies the input values with their corresponding weights and sums them:
+        </p>
+
+        <p class="formula-large">
+            Σ ( Wᵀ × X + b )
+        </p>
+        <p class="step-text">
+            Activation functions allow the network to learn <strong>non-linear patterns</strong>,  
+            which is what makes neural networks powerful.
+        </p>
+
+        <ul class="activation-list">
+            <li><strong>ReLU (Rectified Linear Unit)</strong> — Passes only positive signals. Simplifies learning. Most common in hidden layers.</li>
+            <li><strong>Sigmoid</strong> — Squashes values between 0 and 1. Useful when signals represent probabilities.</li>
+            <li><strong>Tanh</strong> — Squashes values between -1 and 1. Data is centered around zero, which can help learning.</li>
+        </ul>
+
+        <p class="step-text">
+            In short, the hidden neurons <strong>learn features</strong> from the input data.  
+            They do <strong>not</strong> make the final decision — they simply transform the information  
+            so that the output neuron can make a clearer decision later.
+        </p>
+        <section class="forward-step">
+
+    <h2 class="step-title" style="margin: 24px;margin-left: 0px;">Step 3: Outputs from Hidden Layer Move to Output Neuron</h2>
+
+        <div class="diagram-box">
+
+            <svg id="step3-diagram" width="600" height="260">
+
+                <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="signal-flow"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="signal-flow"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="signal-flow"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="signal-flow"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Layer Labels -->
+                <text x="420" y="40" fill="#a7b5d1" font-size="14">Output Layer</text>
+
+                <!-- Hidden Neurons (Same coordinates as before) -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron"/>
+                <circle cx="240" cy="190" r="32" class="hidden-neuron"/>
+
+                <!-- Σ Symbols -->
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Bias Labels -->
+                <text x="275" y="90" fill="#ffdd8a" font-size="16">b₁₁</text>
+                <text x="275" y="170" fill="#ffdd8a" font-size="16">b₂₂</text>
+
+                <!-- Output Neuron -->
+                <circle cx="450" cy="155" r="32" class="hidden-neuron"/>
+
+                <!-- Hidden → Output Signal Lines -->
+                <line x1="270" y1="120" x2="420" y2="155" class="signal-flow"/>
+                <circle class="signal-dot" cx="240" cy="120" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="120" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <line x1="270" y1="190" x2="420" y2="155" class="signal-flow"/>
+                <circle class="signal-dot" cx="240" cy="190" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="190" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+        <p class="step-text">
+                Now, each hidden neuron has produced an output.  
+                These outputs are calculated as the weighted combination of <strong>iq</strong> and <strong>cgpa</strong>,  
+                plus a bias term for each neuron.
+            </p>
+
+            <p class="formula-large">
+                Neuron 1 Output = activation( W¹₁₁ · iq + W¹₂₁ · cgpa + b₁₁ )  
+                <br>
+                Neuron 2 Output = activation( W¹₁₂ · iq + W¹₂₂ · cgpa + b₂₂ )
+            </p>
+
+            <p class="step-text">
+                These two outputs now flow forward to the final neuron in the output layer.
+        </p>
+
+    <h2 class="step-title" style="margin: 24px;margin-left: 0px;">Step 4: Final Output Calculation</h2>
+
+    <div class="diagram-box">
+
+        <svg id="step4-diagram" width="600" height="260">
+
+            <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="signal-flow"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="signal-flow"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="signal-flow"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="signal-flow"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Layer Labels -->
+                <text x="420" y="40" fill="#a7b5d1" font-size="14">Output Layer</text>
+
+                <!-- Bias Labels -->
+                <text x="275" y="90" fill="#ffdd8a" font-size="16">b₁₁</text>
+                <text x="275" y="170" fill="#ffdd8a" font-size="16">b₂₂</text>
+
+                <!-- Output Neuron -->
+                <circle cx="450" cy="155" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="443" y="160" fill="#00d4ff" font-size="20">Σ</text>
+
+
+                <!-- Hidden → Output Signal Lines -->
+                <line x1="270" y1="120" x2="420" y2="155" class="signal-flow"/>
+                <text x="335" y="125" fill="#7cc7ff" font-size="14">W²₁₁</text>
+                <circle class="signal-dot" cx="240" cy="120" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="120" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <line x1="270" y1="190" x2="420" y2="155" class="signal-flow"/>
+                <text x="335" y="195" fill="#7cc7ff" font-size="14">W²₂₁</text>
+                <circle class="signal-dot" cx="240" cy="190" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="190" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+            
+
+            <!-- Bias for Output Neuron -->
+            <text x="485" y="130" fill="#ffdd8a" font-size="16">b₂₁</text>
+
+            <!-- Output Line -->
+            <line x1="485" y1="155" x2="545" y2="155" class="signal-flow"/>
+            <circle class="signal-dot" cx="485" cy="155" r="4">
+                <animate attributeName="cx" from="485" to="545" dur="1.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" from="155" to="155" dur="1.6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Output Label -->
+            <text x="550" y="160" fill="#a7b5d1" font-size="18" font-weight="bold">ŷ</text>
+
+        </svg>
+
+    </div>
+    <p class="step-text">
+        The outputs from the two hidden neurons are now combined in the final output neuron.  
+        Just like before, the weighted values and a bias term are added:
+    </p>
+
+    <p class="formula-large">
+        ŷ = activation( W²₁₁ · O₁₁ + W²₂₁ · O₁₂ + b₂₁ )
+    </p>
+
+    <p class="step-text">
+        Here:
+        <br><strong>O₁₁</strong> and <strong>O₁₂</strong> are the outputs from the two hidden neurons.
+        <br><strong>W²₁₁</strong> and <strong>W²₂₁</strong> are the weights from the hidden layer to the output neuron.
+        <br><strong>b₂₁</strong> is the bias for the output neuron.
+    </p>
+    <p class="step-text">
+        If the problem is a <strong>Yes/No decision</strong> (like “Placement or Not”),  
+        we apply a <strong>Step Function</strong> or <strong>Sigmoid</strong> at the output neuron:
+    </p>
+
+    <ul class="activation-list">
+        <li><strong>Step Function</strong> → If we need a hard final decision (0 or 1).</li>
+        <li><strong>Sigmoid</strong> → If we want a <em>probability</em> like “there is an 82% chance of placement”.</li>
+    </ul>
+
+
+</section>
+<div class="math-toggle">
+    <span class="math-toggle-text">▼ Show Mathematical Derivation</span>
+</div>
+
+<div id="math-section" class="math-section">
+    <script>
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- We will fill this section with your real math after you send your images -->
+    <p style="margin-top: 10px; color:#c9d6ff;">
+        The forward propagation can also be expressed using matrix multiplication.
+    </p>
+<p><strong>Notation (Single Example)</strong></p>
+
+<p>Input vector:</p>
+
+    $$
+    x=
+    \begin{bmatrix}
+    \text{iq}\\
+    \text{cgpa}
+    \end{bmatrix}
+    $$
+
+    <p>Layer-1 (Hidden Layer) Weights and Biases:</p>
+
+    $$
+    W^{(1)}=
+    \begin{bmatrix}
+    W^{1}_{11} & W^{1}_{12}\\
+    W^{1}_{21} & W^{1}_{22}
+    \end{bmatrix},
+    \qquad
+    b^{(1)}=
+    \begin{bmatrix}
+    b_{11}\\
+    b_{12}
+    \end{bmatrix}
+    $$
+
+    <p>Layer-2 (Output Layer) Weights and Bias:</p>
+
+    $$
+    W^{(2)}=
+    \begin{bmatrix}
+    W^{2}_{11}\\
+    W^{2}_{21}
+    \end{bmatrix},
+    \qquad
+    b^{(2)} = b_{21}
+    $$
+
+    <p>
+    \(a(\cdot)\): Activation function in hidden layer (ReLU / Sigmoid / Tanh) <br>
+    \(g(\cdot)\): Activation function in output layer (Step or Sigmoid)
+    </p>
+
+    <hr style="opacity:0.15;">
+
+    <h3>Layer 1 — Hidden Layer Computation</h3>
+
+    <p>Component-wise:</p>
+
+    $$
+    z^{(1)}_1 = W^{1}_{11}\cdot \text{iq} + W^{1}_{21}\cdot \text{cgpa} + b_{11}
+    $$
+
+    $$
+    z^{(1)}_2 = W^{1}_{12}\cdot \text{iq} + W^{1}_{22}\cdot \text{cgpa} + b_{12}
+    $$
+
+    <p>Matrix Form:</p>
+
+    $$
+    z^{(1)} = (W^{(1)})^{T} x + b^{(1)}
+    $$
+    
+    $$
+    z^{(1)} =
+    \begin{bmatrix}
+    W^{1}_{11} & W^{1}_{12}\\
+    W^{1}_{21} & W^{1}_{22}
+    \end{bmatrix}^{T}
+    \begin{bmatrix}
+    \text{iq}\\
+    \text{cgpa}
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+    b_{11}\\
+    b_{12}
+    \end{bmatrix}
+    $$
+
+    $$
+    z^{(1)} =
+    \begin{bmatrix}
+    W^{1}_{11} & W^{1}_{21}\\
+    W^{1}_{12} & W^{1}_{22}
+    \end{bmatrix}
+    \begin{bmatrix}
+    \text{iq}\\
+    \text{cgpa}
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+    b_{11}\\
+    b_{12}
+    \end{bmatrix}
+    $$
+
+    $$
+    z^{(1)} =
+    \begin{bmatrix}
+    W^{1}_{11}\cdot \text{iq} + W^{1}_{21}\cdot \text{cgpa} + b_{11}\\
+    W^{1}_{12}\cdot \text{iq} + W^{1}_{22}\cdot \text{cgpa} + b_{12}
+    \end{bmatrix}
+    $$
+
+    <p>Apply activation to get hidden outputs:</p>
+
+    $$
+    h = a(z^{(1)}) =
+    \begin{bmatrix}
+    o_{11}\\
+    o_{12}
+    \end{bmatrix}
+    $$
+
+    <hr style="opacity:0.15;">
+
+    <h3>Layer 2 — Output Layer Computation</h3>
+
+    <p>Matrix Form:</p>
+
+    $$
+    z^{(2)} = (W^{(2)})^{T} h + b^{(2)}
+    $$
+
+    $$
+    z^{(2)} =
+    \begin{bmatrix}
+    W^{2}_{11} & W^{2}_{21}
+    \end{bmatrix}
+    \begin{bmatrix}
+    o_{11}\\
+    o_{12}
+    \end{bmatrix}
+    + b_{21}
+    $$
+
+    <p>Scalar Form:</p>
+
+    $$
+    z^{(2)} = W^{2}_{11}\cdot o_{11} + W^{2}_{21}\cdot o_{12} + b_{21}
+    $$
+
+    <p>Final Prediction:</p>
+
+    $$
+    \hat{y} = g(z^{(2)})
+    $$
+
+    <p>
+    If the task is a <strong>Yes/No</strong> decision (e.g., Placement or Not):
+    <br> Use <strong>Step Function</strong>.
+    </p>
+
+    <p>
+    If the task requires a <strong>probability</strong> (e.g., likelihood of placement):
+    <br> Use <strong>Sigmoid</strong>.
+</p>
+
+</div>
+
+<section id="backprop">
+    <h2 style ="font-weight: bold;font-size:40px;">What is Backpropagation?</h2>
+    <p style="font-size:20px;">Backward propagation — or <b>backpropagation</b> — is how a neural network learns from its <b>mistakes</b>.</p>
+    <p style="font-size:18px;">When the network makes a wrong prediction, it doesn’t just say “oops.”
+        It traces the error backward through all the layers to see which weights and connections caused the mistake, and then adjusts them a little to do better next time.
+    </p>
+    <pre style="font-size:18px;">You can think of it like this:
+
+        => Forward propagation is “thinking.”
+        => Backward propagation is “learning from being wrong.”
+    </pre>
+    <h3 style="font-size: 24px;">Scene 1 — Loss Computation</h3>
+    <div class="diagram-box">
+        <svg id="step4-diagram" width="600" height="260">
+
+            <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="signal-flow"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="signal-flow"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="signal-flow"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="signal-flow"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron active-neuron-glow"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Layer Labels -->
+                <text x="420" y="40" fill="#a7b5d1" font-size="14">Output Layer</text>
+
+                <!-- Bias Labels -->
+                <text x="275" y="90" fill="#ffdd8a" font-size="16">b₁₁</text>
+                <text x="275" y="170" fill="#ffdd8a" font-size="16">b₂₂</text>
+
+                <!-- Output Neuron -->
+                <circle cx="450" cy="155" r="32" class="output-neuron-error"/>
+                <text x="443" y="160" fill="#00d4ff" font-size="20">Σ</text>
+
+
+                <!-- Hidden → Output Signal Lines -->
+                <line x1="270" y1="120" x2="420" y2="155" class="signal-flow"/>
+                <text x="335" y="125" fill="#7cc7ff" font-size="14">W²₁₁</text>
+                <circle class="signal-dot" cx="240" cy="120" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="120" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <line x1="270" y1="190" x2="420" y2="155" class="signal-flow"/>
+                <text x="335" y="195" fill="#7cc7ff" font-size="14">W²₂₁</text>
+                <circle class="signal-dot" cx="240" cy="190" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="190" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+            
+
+            <!-- Bias for Output Neuron -->
+            <text x="485" y="130" fill="#ffdd8a" font-size="16">b₂₁</text>
+
+            <!-- Output Line -->
+            <line x1="485" y1="155" x2="545" y2="155" class="signal-flow"/>
+            <circle class="signal-dot" cx="485" cy="155" r="4">
+                <animate attributeName="cx" from="485" to="545" dur="1.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" from="155" to="155" dur="1.6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Output Label -->
+            <text x="550" y="160" fill="#a7b5d1" font-size="18" font-weight="bold" class="y-hat-error">ŷ</text>
+
+        </svg>
+    </div>
+
+    <div class="scene-box">
+        <p class="scene-desc">
+            The network made a prediction <strong>ŷ</strong> and we compare it with the true value <strong>y</strong>.
+            The difference between them is the <strong>loss</strong>, which tells us how wrong the prediction was.
+            To Calculate the loss we need to choose a loss function for eg., MSE(y - ŷ)².
+        </p>
+
+        <div class="loss-panel">
+            <div class="loss-value">
+                <p><strong>True Label (y):</strong> 1</p>
+                <p><strong>Predicted (ŷ):</strong> 0.42</p>
+            </div>
+
+            <div class="loss-meter">
+                <div class="loss-bar"></div>
+            </div>
+
+            <p class="loss-text">Loss increases as the prediction moves away from the true value.</p>
+        </div>
+    </div>
+    <h3 style="font-size: 24px;">Scene 2 — Backward Pass (Error Flow)</h3>
+    <div class="diagram-box pause-forward">
+        <svg id="step4-diagram" width="600" height="260">
+
+            <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="signal-flow error-backflow"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <!-- <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="signal-flow error-backflow"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <!-- <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="signal-flow error-backflow"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <!-- <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="signal-flow error-backflow"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <!-- <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron error-receive"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron error-receive"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Layer Labels -->
+                <text x="420" y="40" fill="#a7b5d1" font-size="14">Output Layer</text>
+
+                <!-- Bias Labels -->
+                <text x="275" y="90" fill="#ffdd8a" font-size="16">b₁₁</text>
+                <text x="275" y="170" fill="#ffdd8a" font-size="16">b₂₂</text>
+
+                <!-- Output Neuron -->
+                <circle cx="450" cy="155" r="32" class="output-neuron-error"/>
+                <text x="443" y="160" fill="#00d4ff" font-size="20">Σ</text>
+
+
+                <!-- Hidden → Output Signal Lines -->
+                <line x1="270" y1="120" x2="420" y2="155" class="signal-flow error-backflow"/>
+                <text x="335" y="125" fill="#7cc7ff" font-size="14">W²₁₁</text>
+                <circle class="signal-dot" cx="240" cy="120" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="120" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <line x1="270" y1="190" x2="420" y2="155" class="signal-flow error-backflow"/>
+                <text x="335" y="195" fill="#7cc7ff" font-size="14">W²₂₁</text>
+                <circle class="signal-dot" cx="240" cy="190" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="190" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+            
+
+            <!-- Bias for Output Neuron -->
+            <text x="485" y="130" fill="#ffdd8a" font-size="16">b₂₁</text>
+
+            <!-- Output Line -->
+            <line x1="485" y1="155" x2="545" y2="155" class="signal-flow error-backflow"/>
+            <circle class="signal-dot" cx="485" cy="155" r="4">
+                <animate attributeName="cx" from="485" to="545" dur="1.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" from="155" to="155" dur="1.6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Output Label -->
+            <text x="550" y="160" fill="#a7b5d1" font-size="18" font-weight="bold" class="y-hat-error">ŷ</text>
+
+        </svg>
+    </div>
+    <div class="scene-box">
+        <p class="scene-desc">
+            -> We want to reduce the Loss = (y − ŷ)².<br>
+            -> To reduce this loss, the network must adjust ŷ.<br>
+
+            -> But ŷ depends on the outputs of the two hidden neurons (O₁₁ and O₁₂).<br><br>
+
+            -> And these hidden neuron outputs depend on their weights and biases:<br>
+            <ul>
+                <li>O₁₁ depends on W¹₁₁, W¹₂₁ and b₁₁</li>
+                <li>O₁₂ depends on W¹₁₂, W¹₂₂ and b₁₂</li>
+            </ul>
+
+            So the error first flows backward from the output neuron to the hidden neurons. 
+            Each hidden neuron receives a portion of the blame proportional to how much 
+            its output influenced the final prediction (through its weights).
+
+        </p>
+    </div>
+    <h3 style="font-size: 24px;">Scene 3 — Weights & Bias Update By Gradient Descent</h3>
+    <div class="diagram-box pause-forward">
+        <svg id="step4-diagram" width="600" height="260">
+
+            <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="signal-flow error-backflow"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <!-- <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="signal-flow error-backflow"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <!-- <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="signal-flow error-backflow"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <!-- <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="signal-flow error-backflow"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <!-- <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron error-receive"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron error-receive"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Layer Labels -->
+                <text x="420" y="40" fill="#a7b5d1" font-size="14">Output Layer</text>
+
+                <!-- Bias Labels -->
+                <text x="275" y="90" fill="#ffdd8a" font-size="16">b₁₁</text>
+                <text x="275" y="170" fill="#ffdd8a" font-size="16">b₂₂</text>
+
+                <!-- Output Neuron -->
+                <circle cx="450" cy="155" r="32" class="output-neuron-error"/>
+                <text x="443" y="160" fill="#00d4ff" font-size="20">Σ</text>
+
+
+                <!-- Highlighted Weight for Update Demonstration -->
+                <line x1="270" y1="120" x2="420" y2="155" class="learning-line"/>
+                <text x="335" y="125" fill="#ffd2e0" font-size="14">W²₁₁</text>
+                <circle class="signal-dot" cx="240" cy="120" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="120" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <line x1="270" y1="190" x2="420" y2="155" class="signal-flow error-backflow"/>
+                <text x="335" y="195" fill="#7cc7ff" font-size="14">W²₂₁</text>
+                <circle class="signal-dot" cx="240" cy="190" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="190" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+            
+
+            <!-- Bias for Output Neuron -->
+            <text x="485" y="130" fill="#ffdd8a" font-size="16">b₂₁</text>
+
+            <!-- Output Line -->
+            <line x1="485" y1="155" x2="545" y2="155" class="signal-flow error-backflow"/>
+            <circle class="signal-dot" cx="485" cy="155" r="4">
+                <animate attributeName="cx" from="485" to="545" dur="1.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" from="155" to="155" dur="1.6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Output Label -->
+            <text x="550" y="160" fill="#a7b5d1" font-size="18" font-weight="bold" class="y-hat-error">ŷ</text>
+
+        </svg>
+        <p class="scene-desc">
+        To update a weight, the network checks two things:
+        (1) How large the error was, and (2) How strong the input signal on that connection was.
+        This gives the gradient, which tells the network how much that weight affected the mistake.
+        </p>
+
+        <p class="gradient-relation">
+        ∂L/∂W = (error signal) × (activation from previous neuron)
+        </p>
+        <p class="learning-note">
+            The connection is continuously adjusting — the color shift shows the weight learning over time.
+        </p>
+    </div>
+    <div id="gradient-formula-box" class="update-formula-appear">
+        <h3>Gradient formula for Weights & Biase:</h3>
+        <p class="update-formula"><b>
+            W<sub>new</sub> = W<sub>old</sub> − η · ( ∂L / ∂W<sub>old</sub> )
+        </b></p>
+        <p class="update-formula"><b>
+            b<sub>new</sub> = b<sub>old</sub> − η · ( ∂L / ∂b<sub>old</sub> )
+        </b></p>
+    </div>
+    <div class="math-toggle1">
+        <span class="math-toggle-text1">▼ Show Mathematical Derivation</span>
+    </div>
+
+    <div id="math-section1" class="math-section1" style="display:none;">
+    <h3>Gradient Derivation (Backpropagation)</h3>
+
+    <p><strong>Loss:</strong></p>
+    \[
+        L = (y - \hat{y})^2
+    \]
+
+    <p><strong>Output layer:The ŷ depends on the weights like: W²₁₁,W²₂₁ & b₂₁ so,</strong></p>
+    \[
+        \hat{y} = W^{2}_{11}\,O_{11} + W^{2}_{21}\,O_{12} + b_{21}
+    \]
+    \[
+        \frac{\partial L}{\partial \hat{y}} = -2\,(y - \hat{y}), \qquad
+        \frac{\partial \hat{y}}{\partial W^{2}_{11}} = O_{11}, \;
+        \frac{\partial \hat{y}}{\partial W^{2}_{21}} = O_{12}, \;
+        \frac{\partial \hat{y}}{\partial b_{21}} = 1
+    \]
+    <b>Hence,</b>
+    \[
+        \frac{\partial L}{\partial W^{2}_{11}} = -2\,(y - \hat{y})\,O_{11}, \qquad
+        \frac{\partial L}{\partial W^{2}_{21}} = -2\,(y - \hat{y})\,O_{12}, \qquad
+        \frac{\partial L}{\partial b_{21}} = -2\,(y - \hat{y})
+    \]
+
+    <p><strong>Hidden layer (for \(O_{11}\)):</strong></p>
+    \[
+        O_{11} = a\!\left(W^{1}_{11}\,iq + W^{1}_{21}\,cgpa + b_{11}\right)
+    \]
+    \[
+        \frac{\partial L}{\partial W^{1}_{11}} = -2\,(y - \hat{y})\, W^{2}_{11}\, iq, \qquad
+        \frac{\partial L}{\partial W^{1}_{21}} = -2\,(y - \hat{y})\, W^{2}_{11}\, cgpa, \qquad
+        \frac{\partial L}{\partial b_{11}} = -2\,(y - \hat{y})\, W^{2}_{11}
+    \]
+
+    <p><strong>Hidden layer (for \(O_{12}\)):</strong></p>
+    \[
+        \frac{\partial L}{\partial W^{1}_{12}} = -2\,(y - \hat{y})\, W^{2}_{21}\, iq, \qquad
+        \frac{\partial L}{\partial W^{1}_{22}} = -2\,(y - \hat{y})\, W^{2}_{21}\, cgpa, \qquad
+        \frac{\partial L}{\partial b_{12}} = -2\,(y - \hat{y})\, W^{2}_{21}
+    \]
+
+    <p><strong>Update rule:</strong></p>
+    \[
+        W_{\text{new}} = W_{\text{old}} - \eta \, \frac{\partial L}{\partial W_{\text{old}}}, \qquad
+        b_{\text{new}} = b_{\text{old}} - \eta \, \frac{\partial L}{\partial b_{\text{old}}}
+    \]
+    </div>
+    <h3 style="font-size: 24px;">Scene 4 — Training Over Time</h3>
+    <div class="diagram-box pause-forward">
+        <svg id="step4-diagram" width="600" height="260">
+
+            <!-- Labels for Layer Names -->
+                <text x="20" y="40" fill="#a7b5d1" font-size="14">Input Layer</text>
+                <text x="200" y="40" fill="#a7b5d1" font-size="14">Hidden Layer</text>
+
+                <!-- Inputs -->
+                <text x="20" y="115" fill="#a7b5d1" font-size="18">iq</text>
+                <text x="6" y="200" fill="#a7b5d1" font-size="18">cgpa</text>
+
+                <!-- Weighted Signal Lines -->
+                <!-- iq → neuron 1 -->
+                <line x1="45" y1="112" x2="210" y2="115" class="learning-line"/>
+                <text x="120" y="105" fill="#7cc7ff" font-size="14">W¹₁₁</text>
+                <!-- <circle class="signal-dot" cx="45" cy="112" r="4">
+                    <animate attributeName="cx" from="45" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="112" to="115" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- iq → neuron 2 -->
+                <line x1="45" y1="113" x2="212" y2="200" class="learning-line"/>
+                <text x="100" y="137" fill="#7cc7ff" font-size="14">W¹₁₂</text>
+                <!-- <circle class="signal-dot" cx="45" cy="113" r="4">
+                    <animate attributeName="cx" from="45" to="212" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="113" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- cgpa → neuron 1 -->
+                <line x1="60" y1="195" x2="210" y2="120" class="learning-line"/>
+                <text x="65" y="175" fill="#7cc7ff" font-size="14">W¹₂₁</text>
+                <!-- <circle class="signal-dot" cx="60" cy="195" r="4">
+                    <animate attributeName="cx" from="60" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="195" to="120" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- cgpa → neuron 2 -->
+                <line x1="50" y1="197" x2="210" y2="200" class="learning-line"/>
+                <text x="130" y="215" fill="#7cc7ff" font-size="14">W¹₂₂</text>
+                <!-- <circle class="signal-dot" cx="50" cy="197" r="4">
+                    <animate attributeName="cx" from="50" to="210" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="197" to="200" dur="1.6s" repeatCount="indefinite"/>
+                </circle> -->
+
+                <!-- Hidden Neurons with Σ inside -->
+                <circle cx="240" cy="120" r="32" class="hidden-neuron error-receive"/>
+                <text x="232" y="125" fill="#00d4ff" font-size="20">Σ</text>
+
+                <circle cx="240" cy="190" r="32" class="hidden-neuron error-receive"/>
+                <text x="232" y="195" fill="#00d4ff" font-size="20">Σ</text>
+
+                <!-- Layer Labels -->
+                <text x="420" y="40" fill="#a7b5d1" font-size="14">Output Layer</text>
+
+                <!-- Bias Labels -->
+                <text x="275" y="90" fill="#ffdd8a" font-size="16">b₁₁</text>
+                <text x="275" y="170" fill="#ffdd8a" font-size="16">b₂₂</text>
+
+                <!-- Output Neuron -->
+                <circle cx="450" cy="155" r="32" class="output-neuron-error"/>
+                <text x="443" y="160" fill="#00d4ff" font-size="20">Σ</text>
+
+
+                <!-- Highlighted Weight for Update Demonstration -->
+                <line x1="270" y1="120" x2="420" y2="155" class="learning-line"/>
+                <text x="335" y="125" fill="#ffd2e0" font-size="14">W²₁₁</text>
+                <circle class="signal-dot" cx="240" cy="120" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="120" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+                <line x1="270" y1="190" x2="420" y2="155" class="learning-line"/>
+                <text x="335" y="195" fill="#7cc7ff" font-size="14">W²₂₁</text>
+                <circle class="signal-dot" cx="240" cy="190" r="4">
+                    <animate attributeName="cx" from="270" to="420" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" from="190" to="155" dur="1.6s" repeatCount="indefinite"/>
+                </circle>
+
+            
+
+            <!-- Bias for Output Neuron -->
+            <text x="485" y="130" fill="#ffdd8a" font-size="16">b₂₁</text>
+
+            <!-- Output Line -->
+            <line x1="485" y1="155" x2="545" y2="155" class="learning-line"/>
+            <circle class="signal-dot" cx="485" cy="155" r="4">
+                <animate attributeName="cx" from="485" to="545" dur="1.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" from="155" to="155" dur="1.6s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Output Label -->
+            <text x="550" y="160" fill="#a7b5d1" font-size="18" font-weight="bold" class="y-hat-error">ŷ</text>
+
+        </svg>
+        <div class="train-controls">
+        <button id="train-toggle">⏸ Pause Training</button>
+        </div>
+
+        <div class="loss-meter">
+            <div class="loss-fill"></div>
+        </div>
+        <p class="loss-value">Loss: <span id="loss-number">1.000</span></p>
+
+    </div>
+
+    <p class="step-text">
+    The network learns by repeating this cycle:
+    </p>
+
+    <p class="formula-l arge">
+    Forward Pass → Loss → Backward Pass → Weight Update
+    </p>
+
+    <p class="step-text">
+    Over many iterations, the loss becomes smaller.  
+    This means the model’s predictions are getting closer to the real target.
+    </p>
+
+
+</section>
+<footer>
+  <p>Made with 💙 using HTML, CSS, and JS & ChatGpt By Om-Codex — Neural Network Visualizer © 2025</p>
+</footer>
+<script>
+const text = "Neural Networks, Visualized.";
+const titleElement = document.getElementById("title");
+let index = 0;
+
+
+
+</script>
+<script src="javascript.js"></script>
+</body>
+</html>
